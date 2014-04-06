@@ -14,7 +14,7 @@ __status__ = "development"
 data_val_max = 10
 n_features = 50
 n_observations = 500
-n_relevant = 10
+n_relevant = 7
 n_select = 5
 n_boots = 100
 fs_method = "MIM"
@@ -27,10 +27,11 @@ def gen_dat():
   data = np.random.randint(data_val_max, size=(n_observations, n_features)) 
   labels = np.zeros((n_observations,))
   for n, sample in enumerate(data):
+    #print sample[:n_relevant], np.sum(sample[:n_relevant]), data_val_max*1.0/2*n_relevant
     if np.sum(sample[:n_relevant]) >= data_val_max*1.0/2*n_relevant:
-      labels[n] = 1
+      labels[n] = 1.
     else:
-      labels[n] = 2
+      labels[n] = 2.
   return data, labels
 
 def run_npfs(data, labels):
@@ -38,7 +39,7 @@ def run_npfs(data, labels):
   mdl = npfs.npfs(fs_method=fs_method, n_select=n_select, n_bootstraps=n_boots, \
       verbose=False, alpha=alpha, beta=beta, parallel=parallel)
   i = mdl.fit(data, labels)
-  print mdl.Bernoulli_matrix
+  print mdl.Bernoulli_matrix.sum(axis=1)
   print i 
   return None 
 
