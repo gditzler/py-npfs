@@ -3,6 +3,7 @@ import numpy as np
 import feast 
 from scipy.stats import binom
 from multiprocessing import Pool
+import matplotlib.pylab as plt
 
 __author__ = "Gregory Ditzler"
 __copyright__ = "Copyright 2014, EESI Laboratory (Drexel University)"
@@ -128,6 +129,32 @@ class npfs:
     labels_sub = self.labels[idx]  # bootstrap labels
     sf = self.method(data_sub, labels_sub, self.n_select) # run feature selection
     return sf
+
+  def plot_bernoulli_matrix(self, show_npfs=False):
+    """
+    Plot the heatmap of the Bernoulli matrix 
+    @self
+    @show_npfs - Highlight NPFS detections [Boolean] 
+    """
+    matrix = self.Bernoulli_matrix
+    if show_npfs == False:
+      plot = plt.imshow(matrix)
+      plot.set_cmap('hot')
+      plt.colorbar()
+      plt.xlabel("Bootstraps")
+      plt.ylabel("Feature")
+      plt.show()
+    else:
+      for i in self.selected_features:
+        for k in range(len(matrix[i])):
+          matrix[i,k] = .5
+      plot = plt.imshow(matrix)
+      plot.set_cmap('hot')
+      plt.xlabel("Bootstraps")
+      plt.ylabel("Feature")
+      plt.colorbar()
+      plt.show()
+    return None
 
 def __call__(obj):
   """
