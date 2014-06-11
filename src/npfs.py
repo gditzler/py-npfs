@@ -15,20 +15,20 @@ __status__ = "development"
 
 class npfs:
 
-  def __init__(self, fs_method="JMI", n_select=5, n_bootstraps=100, verbose=False, \
-      alpha=.01, beta=0.0, parallel=None):
+  def __init__(self, fs_method="JMI", n_select=5, n_bootstraps=100, \
+      verbose=False, alpha=.01, beta=0.0, parallel=None):
     """     
-    :self - self explanitory
-    :fs_method - feature selection algorithm to use. Available methods are: 
+    @self - self explanitory
+    @fs_method - feature selection algorithm to use. Available methods are: 
       CIFE, CMIM, CONDMI, CONDRED, DISR, ICAP, JMI, MIM, MIFS, mRMR
       DEFAULT: JMI
-    :n_select - number of features to select. this is the number of 
+    @n_select - number of features to select. this is the number of 
       features that the base feature selection uses. NPFS may 
       select a different number of features [DEFAULT = 5]
-    :n_bootstraps - number of bootstraps [DEFAULT = 100]
-    :alpha - size of the hypothesis test [DEFAULT = 0.01]
-    :beta - bias parameter for the test [DEFAULT = 0.0]
-    :parallel - number of parallel workers to use [DEFAULT = None]
+    @n_bootstraps - number of bootstraps [DEFAULT = 100]
+    @alpha - size of the hypothesis test [DEFAULT = 0.01]
+    @beta - bias parameter for the test [DEFAULT = 0.0]
+    @parallel - number of parallel workers to use [DEFAULT = None]
     """
     self.fs_method = fs_method
     self.n_select = n_select
@@ -40,12 +40,12 @@ class npfs:
 
   def fit(self, data, labels):
     """
-    :self - self explanitory
-    :data - data in a numpy array. here are some suggestions for formatting 
+    @self - self explanitory
+    @data - data in a numpy array. here are some suggestions for formatting 
       the data. 
       len(data) = n_observations
       len(data.transpose()) = n_features
-    :labels - numerical class labels in a numpy array. 
+    @labels - numerical class labels in a numpy array. 
       len(labels) = n_observations
     """
     data, labels = self.__check_data(data, labels)
@@ -70,10 +70,15 @@ class npfs:
         Z[sf, b] = 1  # mark the features selected with a '1'.
     else:
       pool = Pool(processes = self.parallel)
-      sfs = [pool.apply_async(__call__, args=(self,)) for n in range(self.n_bootstraps)]
+      sfs = [pool.apply_async(__call__, args=(self,)) \
+          for n in range(self.n_bootstraps)]
+      
+      n_finished = 0
+      while n_finished != self.n_bootstraps:
+        n_finished = sum([1.0*sf._ready for sf in sfs])
 
       for sf, b in map(None, sfs, range(self.n_bootstraps)):
-        Z[sf.get(timeout=1), b] = 1
+        Z[sf.get(), b] = 1
       pool.close()
 
     z = np.sum(Z, axis=1)  # z is a binomial random variable
@@ -112,8 +117,8 @@ class npfs:
 
   def boot_iteration(self, null=None):
     """
-    :self
-    :null - leave alone
+    @self
+    @null - leave alone
     """
     # generate some random integers that are the boostrap indices. the size
     # of the bootstrap is the size of the data sample. hence all samples are 
@@ -125,4 +130,8 @@ class npfs:
     return sf
 
 def __call__(obj):
+  """
+  This is a weird little hack to get around using multiprocessing with 
+  the package being called inside of the NPFS object 
+  """
   return obj.boot_iteration(None)
