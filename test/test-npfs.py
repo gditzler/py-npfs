@@ -12,7 +12,7 @@ __email__ = "gregory.ditzler@gmail.com"
 __status__ = "development"
 
 n_select = 5
-n_boots = 100
+n_boots = 50
 fs_method = "MIM"
 alpha = 0.01
 beta = 0.0
@@ -45,6 +45,7 @@ def run_npfs(data, labels):
   i = mdl.fit(data, labels)
   print mdl.Bernoulli_matrix.sum(axis=1)
   print i 
+  mdl.plot_bernoulli_matrix(show_npfs=True)
   return None 
 
 def main():
