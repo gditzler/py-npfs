@@ -100,6 +100,10 @@ def load_map(fname):
   return meta_data
 
 def write_results(features, results, fn):
+  """
+  write the indicies listed in results from the features array into fn into a
+  tabular output.
+  """
   with open(fn, 'w') as fh:
     for n in results:
       array = json.loads(features[n])
@@ -133,34 +137,30 @@ def build_parser():
     description=("Fizzy implements feature subset selection for biological "
       "data formats, which are commonly used in metagenomic data analysis.\n")
   )
-  parser.add_argument("-n", "--select", 
+  parser.add_argument("-n", "--select",
     type=int, 
-    help="number of features to start with", 
+    help="number of features to start with",
     default=5)
-  parser.add_argument("-b", "--bootstraps", 
+  parser.add_argument("-b", "--bootstraps",
     type=int, 
     help="number of bootstraps to run",
     default=50)
-  parser.add_argument("-l", "--label", 
+  parser.add_argument("-l", "--label",
     help="name of column of the mapping file that "
       +"indicates the labels",
     required=True)
-  parser.add_argument("-f", "--fs-method", 
+  parser.add_argument("-f", "--fs-method",
     help="Feature selection method. Available: "
-      +"CIFE CMIM CondMI Condred ICAP JMI MIM MIFS mRMR", 
+      +"CIFE CMIM CondMI Condred ICAP JMI MIM MIFS mRMR",
     default="MIM")
-  parser.add_argument("-i", "--input-file", 
-    help="biom format file", 
+  parser.add_argument("-i", "--input-file",
+    help="biom format file",
     required=True)
-  parser.add_argument("-m", "--map-file", 
-    help="map file (tsv)", 
+  parser.add_argument("-m", "--map-file",
+    help="map file (tsv)",
     required=True)
-  parser.add_argument("-j", "--json", 
-    help="store the output as a json format file.",
-    action="store_true",
-    required=False)
-  parser.add_argument("-o", "--output-file", 
-    help="output file where selected OTU IDs and averages of the OTUS for each class"
+  parser.add_argument("-o", "--output-file",
+    help="output file where selected OTU IDs"
     +"are stored", 
     required=True)
   return parser
@@ -176,8 +176,8 @@ def main():
     parser.error("Error loading the PyFeast module. is PyFeast installed?")
 
   try:
-		global npfs
-		import npfs
+    global npfs
+    import npfs
   except ImportError:
     parser.error("Error loading the NPFS module. is NPFS installed?")
 
@@ -214,9 +214,7 @@ def main():
   results = mdl.fit(data, labels_disc_arr)
 
   write_results(features, results, args.output_file)
-  # mdl.plot_bernoulli_matrix(show_npfs=True)
+
 
 if __name__ == "__main__":
   sys.exit(main())
-
-
