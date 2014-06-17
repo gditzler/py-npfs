@@ -72,19 +72,8 @@ class npfs:
     else:
       pool = Pool(processes = self.parallel)
       sfs = pool.map(__call__, (self for x in range(self.n_bootstraps)))
-#      sfs = [pool.apply_async(__call__, args=(self,)) \
-#          for n in range(self.n_bootstraps)]
-
-#      n_finished = 0
-#      while n_finished != self.n_bootstraps:
-#        n_finished = sum([1.0*sf._ready for sf in sfs])
-
-      import pdb
-      pdb.set_trace()
-
       for x in range(len(sfs)):
         Z[sfs[x], x] = 1
-#      pool.close()
 
     z = np.sum(Z, axis=1)  # z is a binomial random variable
     # compute the neyman-pearson threshold (include the bias term)
