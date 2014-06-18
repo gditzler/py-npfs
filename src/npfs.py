@@ -17,7 +17,7 @@ __status__ = "development"
 class npfs:
 
   def __init__(self, fs_method="JMI", n_select=5, n_bootstraps=100, \
-      verbose=False, alpha=.01, beta=0.0, parallel=None):
+      verbose=False, alpha=.01, beta=0.0, parallel=None, min_improv=0.):
     """     
     @self - self explanitory
     @fs_method - feature selection algorithm to use. Available methods are: 
@@ -30,6 +30,7 @@ class npfs:
     @alpha - size of the hypothesis test [DEFAULT = 0.01]
     @beta - bias parameter for the test [DEFAULT = 0.0]
     @parallel - number of parallel workers to use [DEFAULT = None]
+    @min_improv - critera for early stopping [DEFAULT = 0.0]
     """
     self.fs_method = fs_method
     self.n_select = n_select
@@ -38,6 +39,11 @@ class npfs:
     self.beta = beta
     self.selected_features = []
     self.parallel = parallel
+    self.min_improv = min_improv
+    if min_improv != 0.:
+      self.early_stopping = True 
+    else:
+      self.early_stopping  = False 
 
   def fit(self, data, labels):
     """
@@ -66,9 +72,23 @@ class npfs:
     self.labels = labels
 
     if self.parallel == None: 
-      for b in range(self.n_bootstraps):
-        sf = self.boot_iteration()
-        Z[sf, b] = 1  # mark the features selected with a '1'.
+      if self.early_stopping == False: 
+        for b in range(self.n_bootstraps):
+          sf = self.boot_iteration()
+          Z[sf, b] = 1  # mark the features selected with a '1'.
+      else:
+        p1_old = np.zeros((self.n_features,))
+        for b in range(self.n_bootstraps):
+          sf = self.boot_iteration()
+          Z[sf, b] = 1.
+
+          p1 = Z.sum(axis=1)/b
+          d = np.abs(p1 - p1_old).mean()
+          if d < self.min_improv:
+            self.run_time = b
+            break
+          p1_old = p1
+
     else:
       pool = Pool(processes = self.parallel)
       sfs = [pool.apply_async(__call__, args=(self,)) \
