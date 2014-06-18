@@ -91,16 +91,9 @@ class npfs:
 
     else:
       pool = Pool(processes = self.parallel)
-      sfs = [pool.apply_async(__call__, args=(self,)) \
-          for n in range(self.n_bootstraps)]
-      
-      n_finished = 0
-      while n_finished != self.n_bootstraps:
-        n_finished = sum([1.0*sf._ready for sf in sfs])
-
-      for sf, b in map(None, sfs, range(self.n_bootstraps)):
-        Z[sf.get(), b] = 1
-      pool.close()
+      sfs = pool.map(__call__, (self for x in range(self.n_bootstraps)))
+      for x in range(len(sfs)):
+        Z[sfs[x], x] = 1
 
     z = np.sum(Z, axis=1)  # z is a binomial random variable
     # compute the neyman-pearson threshold (include the bias term)
@@ -109,7 +102,6 @@ class npfs:
       raise ValueError("p+beta > 1 -> Invalid probability")
 
     delta = binom.ppf(1 - self.alpha, self.n_bootstraps, p)
-    
     # based on the threshold, determine which features are relevant and return
     # them in a numpy array 
     selected_features = []
