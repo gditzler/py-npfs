@@ -16,6 +16,21 @@ There are types of feature subset selection problems that require that the size 
 
 * Gregory Ditzler, Robi Polikar, Gail Rosen, "A Bootstrap Based Neyman–Pearson Test for Identifying Variable Importance," 2014, In press. ([link](http://gregoryditzler.files.wordpress.com/2014/05/tnnls2014.pdf))
 
+# Requirements
+
+In order to use the feast module, you will need the following dependencies
+
+## Requirements
+In order to use the feast module, you will need the following dependencies
+
+* Python 2.7
+* Numpy
+* Linux or OS X 
+* [MIToolbox](https://github.com/Craigacp/MIToolbox)
+* [FEAST](https://github.com/Craigacp/FEAST) v1.1.1 or higher
+* [PyFeast](https://github.com/EESI/PyFeast)
+
+
 # Word Cloud
 
 ![alt tag](https://raw.github.com/gditzler/NPFS/master/img/npfs.jpg)
